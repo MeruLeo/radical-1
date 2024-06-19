@@ -1,30 +1,40 @@
 import React from "react";
-import { Formik, Form } from "formik";
+import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import AnimatedBtn from "../butttons/animated/AnimatedBtn";
 import Input from "./input/Input";
+import NormalBtn from "../butttons/Normal/NormalBtn";
 
-const validationSchema = Yup.object({
-  entercode: Yup.string()
-    .matches(/^\d{5}$/, "لطفا پنج رقم وارد کنید")
-    .required("این فیلد اجباری است"),
-});
+const FormComponent = ({ inputs, btn, onSubmit }) => {
+  const validationSchema = Yup.object(
+    inputs.reduce((acc, input) => {
+      acc[input.name] = input.validationSchema;
+      return acc;
+    }, {})
+  );
 
-const FormComponent = ({ btn }) => {
+  const initialValues = inputs.reduce((acc, input) => {
+    acc[input.name] = input.initialValue || "";
+    return acc;
+  }, {});
+
   return (
     <Formik
-      initialValues={{
-        entercode: "",
-      }}
+      initialValues={initialValues}
       validationSchema={validationSchema}
       onSubmit={(values) => {
-        console.log(values);
+        onSubmit(values); // استفاده از تابع onSubmit
       }}
     >
       {() => (
-        <Form className="w-full max-w-sm mx-auto mt-10">
-          <Input title="کد ورود" name="entercode" type="number" />
-          {btn}
+        <Form className="w-full max-w-sm mx-auto flex flex-col items-center">
+          {inputs.map((input, index) => (
+            <div key={index}>
+              <Input title={input.title} name={input.name} type={input.type} />
+            </div>
+          ))}
+          <div className="mt-10">
+            <button type="submit">{btn.props.title}</button>
+          </div>
         </Form>
       )}
     </Formik>
